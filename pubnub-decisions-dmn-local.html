@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PubNub Illuminate - Decisions (Local)</title>
+    
+    <!-- DMN-js CSS - Local hosting for better reliability -->
+    <link rel="stylesheet" href="assets/dmn-js/css/dmn-js-drd.css">
+    <link rel="stylesheet" href="assets/dmn-js/css/dmn-js-decision-table.css">
+    <link rel="stylesheet" href="assets/dmn-js/css/dmn-js-literal-expression.css">
+    <link rel="stylesheet" href="assets/dmn-js/css/dmn-js-shared.css">
+    
+    <!-- Open Source UX Enhancement Tools - Local hosting -->
+    <link rel="stylesheet" href="assets/ux-tools/animate.min.css">
+    <script src="assets/ux-tools/tippy.min.js"></script>
+    <script src="assets/ux-tools/sweetalert2.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f6fa;
+            color: #333;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* PubNub Sidebar */
+        .sidebar {
+            width: 220px;
+            background: #1e3a8a;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .sidebar-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .pubnub-logo {
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+            background: #3b82f6;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 8px 0;
+        }
+
+        .nav-section {
+            margin-bottom: 16px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: #dc2626;
+            color: white;
+        }
+
+        .nav-item-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 12px;
+        }
+
+        .nav-expand {
+            margin-left: 20px;
+            border-left: 1px solid rgba(255, 255, 255, 0.2);
+            padding-left: 16px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .content-header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .back-arrow {
+            color: #6b7280;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .decision-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid #d1d5db;
+            background: white;
+            color: #374151;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #f9fafb;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+            border-color: #dc2626;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        /* Decision Content */
+        .decision-content {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .decision-info {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-label {
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-size: 14px;
+            color: #111827;
+        }
+
+        .info-link {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        .info-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Decision Table */
+        .decision-table-section {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            background: #f9fafb;
+            padding: 16px 24px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .table-content {
+            padding: 0;
+        }
+
+        /* Enhanced PubNub-style Decision Table */
+        .pubnub-decision-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .pubnub-decision-table th {
+            background: #f8fafc;
+            padding: 14px 16px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-right: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+            position: relative;
+        }
+
+        .pubnub-decision-table th:last-child {
+            border-right: none;
+        }
+
+        .pubnub-decision-table td {
+            padding: 12px 16px;
+            border-right: 1px solid #f1f5f9;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 13px;
+            color: #334155;
+            vertical-align: middle;
+        }
+
+        .pubnub-decision-table td:last-child {
+            border-right: none;
+        }
+
+        .pubnub-decision-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .conditions-header {
+            text-align: center;
+            background: #f1f5f9 !important;
+            color: #475569;
+            border-color: #cbd5e1 !important;
+        }
+
+        .actions-header {
+            text-align: center;
+            background: #f0fdf4 !important;
+            color: #065f46;
+            border-color: #bbf7d0 !important;
+        }
+
+        .rule-number {
+            background: #f8fafc !important;
+            color: #64748b;
+            font-weight: 600;
+            text-align: center;
+            width: 50px;
+            font-size: 12px;
+        }
+
+        .condition-cell, .action-cell {
+            text-align: center;
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .condition-cell {
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .condition-cell.equal {
+            background: #eff6ff;
+            color: #1e40af;
+        }
+
+        .action-cell {
+            background: #f0fdf4;
+            color: #166534;
+        }
+
+        /* DMN Canvas Container */
+        .dmn-modal-container {
+            height: 600px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            background: white;
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        #dmn-canvas {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* Enhanced PubNub-style DMN Table Styling */
+        .dmn-modal-container .tjs-table {
+            border: 1px solid #e5e7eb !important;
+            border-radius: 8px !important;
+            font-size: 13px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+        }
+
+        /* Enhanced PubNub-style DMN table headers */
+        .dmn-modal-container .tjs-table th {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+            font-weight: 600 !important;
+            color: #475569 !important;
+            font-size: 12px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+            padding: 14px 16px !important;
+            text-align: center !important;
+            position: relative;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+        }
+
+        /* Enhanced PubNub-style table cells */
+        .dmn-modal-container .tjs-table td {
+            border: 1px solid #f1f5f9 !important;
+            padding: 12px 16px !important;
+            text-align: center !important;
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace !important;
+            font-size: 12px !important;
+            font-weight: 500 !important;
+            background: white !important;
+            color: #334155 !important;
+        }
+
+        /* Rule number cells (first column) */
+        .dmn-modal-container .tjs-table td:first-child {
+            background: #f8fafc !important;
+            color: #64748b !important;
+            font-weight: 600 !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+            font-size: 12px !important;
+        }
+
+        /* Output cells styling */
+        .dmn-modal-container .tjs-table td.output-cell,
+        .dmn-modal-container .tjs-table td[data-element-id*="output"] {
+            background: #f0fdf4 !important;
+            color: #166534 !important;
+        }
+
+        /* Input cells styling */
+        .dmn-modal-container .tjs-table td.input-cell,
+        .dmn-modal-container .tjs-table td[data-element-id*="input"] {
+            background: #eff6ff !important;
+            color: #1e40af !important;
+        }
+
+        /* Output header styling */
+        .dmn-modal-container .tjs-table th.output-header {
+            background: #f0fdf4 !important;
+            color: #065f46 !important;
+            border-color: #bbf7d0 !important;
+        }
+
+        /* Input header styling */
+        .dmn-modal-container .tjs-table th.input-header {
+            background: #eff6ff !important;
+            color: #1e40af !important;
+            border-color: #bfdbfe !important;
+        }
+
+        /* Hide DMN elements we don't want */
+        .dmn-modal-container .djs-palette,
+        .dmn-modal-container .bio-properties-panel,
+        .dmn-modal-container .dmn-palette,
+        .dmn-modal-container .drd-palette,
+        .dmn-modal-container .dmn-icon-view-drd,
+        .dmn-modal-container .dmn-icon-view-drg {
+            display: none !important;
+        }
+
+        /* Enhanced PubNub-style Context Menus */
+        .context-menu,
+        .context-pad,
+        .popup-menu,
+        .tjs-context-menu,
+        .dmn-context-menu,
+        .djs-context-menu,
+        [class*="context"],
+        [class*="popup"],
+        [class*="menu"][style*="position: absolute"],
+        [style*="position: absolute"][style*="background"] {
+            background: white !important;
+            border: 1px solid #e5e7eb !important;
+            border-radius: 8px !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+            padding: 8px !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+            min-width: 200px !important;
+            z-index: 9999 !important;
+            font-size: 13px !important;
+        }
+
+        /* Context menu entries */
+        .context-menu .entry,
+        .context-pad .entry,
+        .popup-menu .entry,
+        .tjs-context-menu .entry,
+        .dmn-context-menu .entry,
+        .djs-context-menu .entry,
+        .context-menu-entry,
+        .tjs-context-menu-entry,
+        [class*="context"] > *,
+        [class*="popup"] > *,
+        [class*="menu"][style*="position: absolute"] > *,
+        [style*="position: absolute"][style*="background"] > * {
+            display: block !important;
+            padding: 8px 12px !important;
+            margin: 2px 0 !important;
+            font-size: 13px !important;
+            color: #374151 !important;
+            text-decoration: none !important;
+            border-radius: 6px !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease !important;
+            border: none !important;
+            background: none !important;
+            width: 100% !important;
+            text-align: left !important;
+            white-space: nowrap !important;
+            line-height: 1.5 !important;
+        }
+
+        .context-menu .entry:hover,
+        .context-pad .entry:hover,
+        .popup-menu .entry:hover,
+        .tjs-context-menu .entry:hover,
+        .dmn-context-menu .entry:hover,
+        .djs-context-menu .entry:hover,
+        .context-menu-entry:hover,
+        .tjs-context-menu-entry:hover,
+        [class*="context"] > *:hover,
+        [class*="popup"] > *:hover,
+        [class*="menu"][style*="position: absolute"] > *:hover,
+        [style*="position: absolute"][style*="background"] > *:hover {
+            background: #f3f4f6 !important;
+            color: #1f2937 !important;
+        }
+
+        /* Status info */
+        .status-info {
+            margin-top: 12px;
+            padding: 8px 12px;
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #0369a1;
+        }
+
+
+    </style>
+</head>
+  <body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="pubnub-logo">
+                <div class="logo-icon">P</div>
+                pubnub
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <a href="#" class="nav-item">
+                    <span class="nav-item-icon">🏠</span>
+                    Home
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-item-icon">📱</span>
+                    Apps & Keysets
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-item-icon">⚡</span>
+                    Functions
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-item-icon">🔔</span>
+                    Events & Actions
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-item-icon">🐛</span>
+                    Debug Console
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <a href="#" class="nav-item">
+                    <span class="nav-item-icon">📊</span>
+                    Insights
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-item-icon">📈</span>
+                    Usage & Monitoring
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-item-icon">👥</span>
+                    BizOps Workspace
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <a href="#" class="nav-item">
+                    <span class="nav-item-icon">💡</span>
+                    Illuminate
+                </a>
+                <div class="nav-expand">
+                    <a href="#" class="nav-item">Business Objects</a>
+                    <a href="#" class="nav-item">Dashboards</a>
+                    <a href="#" class="nav-item active">Decisions</a>
+                </div>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="content-header">
+            <div class="header-left">
+                <span class="back-arrow">←</span>
+                <h1 class="decision-title">Real-time Message Router</h1>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="showEditMode()">Edit Rules</button>
+                <button class="btn" onclick="showViewMode()" id="viewModeBtn" style="display: none;">View Rules</button>
+                <button class="btn btn-primary" onclick="saveDMNChanges()" id="saveBtn" style="display: none;">Save Changes</button>
+            </div>
+        </header>
+
+        <div class="decision-content">
+            <!-- Decision Information -->
+            <div class="decision-info">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Business Object</span>
+                        <a href="#" class="info-value info-link">Message Routing Analytics</a>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Decision type</span>
+                        <span class="info-value">Metric: Real-time Routing, Aggregation: 5 minutes</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Hit policy</span>
+                        <span class="info-value">Single - Action the first matching rule</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Evaluation frequency</span>
+                        <span class="info-value">Real-time</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Decision Table Section -->
+            <div class="decision-table-section">
+                <div class="table-header">
+                    <h2 class="table-title">Decision Logic</h2>
+                </div>
+
+                <!-- View Mode - Static Table -->
+                <div id="view-mode" class="table-content">
+                    <table class="pubnub-decision-table" id="main-decision-table">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" style="width: 40px;"></th>
+                                <th colspan="3" class="conditions-header">Conditions</th>
+                                <th colspan="2" class="actions-header">Actions</th>
+                            </tr>
+                            <tr>
+                                <th>User Tier</th>
+                                <th>Message Priority</th>
+                                <th>Channel Capacity %</th>
+                                <th>Target Channel</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="rule-number">1</td>
+                                <td class="condition-cell equal">= "enterprise"</td>
+                                <td class="condition-cell equal">≥ 8</td>
+                                <td class="condition-cell equal">< 90</td>
+                                <td class="action-cell">"enterprise.priority.channel"</td>
+                            </tr>
+                            <tr>
+                                <td class="rule-number">2</td>
+                                <td class="condition-cell equal">= "pro"</td>
+                                <td class="condition-cell equal">≥ 7</td>
+                                <td class="condition-cell equal">< 80</td>
+                                <td class="action-cell">"pro.priority.channel"</td>
+                            </tr>
+                            <tr>
+                                <td class="rule-number">3</td>
+                                <td class="condition-cell equal">= "free", "pro", "enterprise"</td>
+                                <td class="condition-cell equal">≥ 5</td>
+                                <td class="condition-cell equal">< 70</td>
+                                <td class="action-cell">"standard.channel"</td>
+                            </tr>
+                            <tr>
+                                <td class="rule-number">4</td>
+                                <td class="condition-cell equal">= "free", "pro", "enterprise"</td>
+                                <td class="condition-cell equal">< 5</td>
+                                <td class="condition-cell equal">≥ 70</td>
+                                <td class="action-cell">"queue.channel"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Edit Mode - Enhanced DMN.js Editor -->
+                <div id="edit-mode" class="table-content" style="display: none;">
+
+
+                    <!-- DMN Canvas -->
+                    <div class="dmn-modal-container">
+                        <div id="dmn-canvas"></div>
+                    </div>
+                    
+                    <!-- Status & Tips -->
+                    <div class="status-info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>💡 DMN Editor:</strong> 
+                                <span id="debug-info">Right-click cells to edit values • Right-click headers for options</span>
+                            </div>
+                            <div style="font-size: 10px; color: #6b7280;">
+                                Powered by DMN.js v16.7.0 (Local)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- DMN-js Library - Local hosting for better reliability -->
+    <script src="assets/dmn-js/js/dmn-modeler.development.js"></script>
+
+    <script>
+        // DMN 1.3 compliant XML for dmn-js
+        const dmnXML = `<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" 
+             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" 
+             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" 
+             id="pubnub_routing" 
+             name="PubNub Message Routing" 
+             namespace="https://pubnub.com/illuminate/decisions">
+  <decision id="messageRouting" name="Message Router">
+    <decisionTable id="messageRoutingTable" hitPolicy="FIRST">
+      <input id="input_userTier" label="User Tier">
+        <inputExpression id="inputExpression_userTier" typeRef="string">
+          <text>userTier</text>
+        </inputExpression>
+      </input>
+      <input id="input_priority" label="Priority">
+        <inputExpression id="inputExpression_priority" typeRef="number">
+          <text>priority</text>
+        </inputExpression>
+      </input>
+      <input id="input_capacity" label="Capacity %">
+        <inputExpression id="inputExpression_capacity" typeRef="number">
+          <text>capacity</text>
+        </inputExpression>
+      </input>
+      <output id="output_channel" label="Target Channel" name="targetChannel" typeRef="string"/>
+      <rule id="rule_enterprise">
+        <inputEntry id="inputEntry_enterprise_tier">
+          <text>"enterprise"</text>
+        </inputEntry>
+        <inputEntry id="inputEntry_enterprise_priority">
+          <text>&gt;= 8</text>
+        </inputEntry>
+        <inputEntry id="inputEntry_enterprise_capacity">
+          <text>&lt; 90</text>
+        </inputEntry>
+        <outputEntry id="outputEntry_enterprise_channel">
+          <text>"enterprise.priority.channel"</text>
+        </outputEntry>
+      </rule>
+      <rule id="rule_pro">
+        <inputEntry id="inputEntry_pro_tier">
+          <text>"pro"</text>
+        </inputEntry>
+        <inputEntry id="inputEntry_pro_priority">
+          <text>&gt;= 7</text>
+        </inputEntry>
+        <inputEntry id="inputEntry_pro_capacity">
+          <text>&lt; 80</text>
+        </inputEntry>
+        <outputEntry id="outputEntry_pro_channel">
+          <text>"pro.priority.channel"</text>
+        </outputEntry>
+      </rule>
+      <rule id="rule_standard">
+        <inputEntry id="inputEntry_standard_tier">
+          <text>"free","pro","enterprise"</text>
+        </inputEntry>
+        <inputEntry id="inputEntry_standard_priority">
+          <text>&gt;= 5</text>
+        </inputEntry>
+        <inputEntry id="inputEntry_standard_capacity">
+          <text>&lt; 70</text>
+        </inputEntry>
+        <outputEntry id="outputEntry_standard_channel">
+          <text>"standard.channel"</text>
+        </outputEntry>
+      </rule>
+      <rule id="rule_queue">
+        <inputEntry id="inputEntry_queue_tier">
+          <text>-</text>
+        </inputEntry>
+        <inputEntry id="inputEntry_queue_priority">
+          <text>&lt; 5</text>
+        </inputEntry>
+        <inputEntry id="inputEntry_queue_capacity">
+          <text>&gt;= 70</text>
+        </inputEntry>
+        <outputEntry id="outputEntry_queue_channel">
+          <text>"queue.channel"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>`;
+
+        let dmnModeler = null;
+        let contextMenuObserver = null;
+        
+        function updateDebugInfo(message) {
+            const debugEl = document.getElementById('debug-info');
+            if (debugEl) {
+                debugEl.textContent = message;
+            }
+            console.log('🔍', message);
+        }
+
+        // Enhanced DMN initialization with UX improvements
+        function initializeDMN() {
+            if (dmnModeler) {
+                try {
+                    dmnModeler.destroy();
+                } catch (error) {
+                    console.warn('Error destroying existing modeler:', error);
+                }
+                dmnModeler = null;
+            }
+            
+            updateDebugInfo('Initializing enhanced DMN editor...');
+            
+            // Clear canvas
+            const canvas = document.getElementById('dmn-canvas');
+            canvas.innerHTML = '<div class="dmn-loading animate__animated animate__fadeIn"><div>🔄 Loading DMN Editor...</div></div>';
+            
+            try {
+                dmnModeler = new DmnJS({
+                    container: '#dmn-canvas',
+                    drd: { enabled: false },
+                    decisionTable: { enabled: true }
+                });
+
+                dmnModeler.importXML(dmnXML)
+                    .then((result) => {
+                        updateDebugInfo('✅ DMN loaded successfully with enhanced UX');
+                        
+                        setTimeout(() => {
+                            const views = dmnModeler.getViews();
+                            const decisionView = views.find(v => v.type === 'decisionTable');
+                            if (decisionView) {
+                                dmnModeler.open(decisionView);
+                                updateDebugInfo('✅ Decision table ready • Right-click cells to edit');
+                                
+                                // Apply PubNub enhancements after DMN loads
+                                setTimeout(() => {
+                                    enhanceDMNWithUX();
+                                    setupContextMenuObserver();
+                                    showSuccessToast('DMN Editor Ready');
+                                }, 300);
+                            }
+                        }, 100);
+                    })
+                    .catch(err => {
+                        updateDebugInfo('❌ Error loading DMN: ' + err.message);
+                        showErrorToast('Failed to load DMN editor: ' + err.message);
+                    });
+                    
+            } catch (initError) {
+                updateDebugInfo('❌ DMN initialization failed: ' + initError.message);
+                showErrorToast('Failed to initialize DMN editor: ' + initError.message);
+            }
+        }
+
+        // Enhanced DMN UX features
+        function enhanceDMNWithUX() {
+            console.log('🎨 Applying UX enhancements...');
+            
+            // Add tooltips to table headers
+            const headers = document.querySelectorAll('.dmn-modal-container .tjs-table th');
+            headers.forEach((header, index) => {
+                if (header.textContent.trim()) {
+                    tippy(header, {
+                        content: `Right-click to edit "${header.textContent.trim()}"`,
+                        theme: 'pubnub'
+                    });
+                }
+            });
+
+            // Add tooltips to cells
+            const cells = document.querySelectorAll('.dmn-modal-container .tjs-table td');
+            cells.forEach(cell => {
+                if (cell.textContent.trim() && !cell.textContent.includes('1') && !cell.textContent.includes('2')) {
+                    tippy(cell, {
+                        content: 'Right-click to edit this value',
+                        theme: 'pubnub'
+                    });
+                }
+            });
+
+            // Style table elements
+            styleTableElements();
+        }
+
+        // Context menu observer for dynamic DMN elements
+        function setupContextMenuObserver() {
+            if (contextMenuObserver) {
+                contextMenuObserver.disconnect();
+            }
+            
+            contextMenuObserver = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === 1 && node.style && node.style.position === 'absolute') {
+                            enhanceContextMenu(node);
+                        }
+                    });
+                });
+            });
+            
+            contextMenuObserver.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        }
+
+        // Enhance context menus with PubNub styling
+        function enhanceContextMenu(menuElement) {
+            if (!menuElement || menuElement.dataset.pubnubEnhanced) return;
+            
+            menuElement.dataset.pubnubEnhanced = 'true';
+            menuElement.classList.add('animate__animated', 'animate__fadeIn', 'animate__faster');
+            
+            // Apply enhanced styling
+            menuElement.style.background = 'white';
+            menuElement.style.border = '1px solid #e5e7eb';
+            menuElement.style.borderRadius = '8px';
+            menuElement.style.boxShadow = '0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+            menuElement.style.padding = '8px';
+            menuElement.style.zIndex = '9999';
+        }
+
+        // Style table elements
+        function styleTableElements() {
+            const table = document.querySelector('#edit-mode .dmn-modal-container .tjs-table');
+            if (!table) return;
+            
+            const headers = table.querySelectorAll('th');
+            const cells = table.querySelectorAll('td');
+            
+            headers.forEach((header, index) => {
+                if (header.textContent.toLowerCase().includes('channel') || 
+                    header.textContent.toLowerCase().includes('mode') ||
+                    header.textContent.toLowerCase().includes('target')) {
+                    header.classList.add('output-header');
+                } else if (index > 0) {
+                    header.classList.add('input-header');
+                }
+            });
+
+            cells.forEach((cell, index) => {
+                const columnIndex = index % headers.length;
+                const header = headers[columnIndex];
+                if (header && header.classList.contains('output-header')) {
+                    cell.classList.add('output-cell');
+                } else if (header && header.classList.contains('input-header')) {
+                    cell.classList.add('input-cell');
+                }
+            });
+        }
+
+        // UX Helper Functions
+        function showSuccessToast(message = 'DMN Editor Ready') {
+            // Simple toast notification
+            const toast = document.createElement('div');
+            toast.innerHTML = `
+                <div style="
+                    position: fixed; 
+                    top: 20px; 
+                    right: 20px; 
+                    background: #10b981; 
+                    color: white; 
+                    padding: 12px 24px; 
+                    border-radius: 8px; 
+                    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+                    z-index: 10000;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    font-size: 14px;
+                    font-weight: 500;
+                    animation: slideIn 0.3s ease-out;
+                ">
+                    ✅ ${message}
+                </div>
+                <style>
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                </style>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease-out reverse';
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 2000);
+        }
+
+        function showErrorToast(message) {
+            // Simple error toast notification
+            const toast = document.createElement('div');
+            toast.innerHTML = `
+                <div style="
+                    position: fixed; 
+                    top: 20px; 
+                    right: 20px; 
+                    background: #dc2626; 
+                    color: white; 
+                    padding: 12px 24px; 
+                    border-radius: 8px; 
+                    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+                    z-index: 10000;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    font-size: 14px;
+                    font-weight: 500;
+                    animation: slideIn 0.3s ease-out;
+                    max-width: 400px;
+                ">
+                    ❌ ${message}
+                </div>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease-out reverse';
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 4000);
+        }
+
+
+
+
+
+        // Main Mode Functions
+        function showEditMode() {
+            document.getElementById('view-mode').style.display = 'none';
+            document.getElementById('edit-mode').style.display = 'block';
+            document.getElementById('edit-mode').classList.add('animate__animated', 'animate__fadeIn');
+            
+            document.querySelector('button[onclick="showEditMode()"]').style.display = 'none';
+            document.getElementById('viewModeBtn').style.display = 'inline-block';
+            document.getElementById('saveBtn').style.display = 'inline-block';
+            
+            setTimeout(initializeDMN, 100);
+        }
+
+        function showViewMode() {
+            document.getElementById('view-mode').style.display = 'block';
+            document.getElementById('edit-mode').style.display = 'none';
+            
+            document.querySelector('button[onclick="showEditMode()"]').style.display = 'inline-block';
+            document.getElementById('viewModeBtn').style.display = 'none';
+            document.getElementById('saveBtn').style.display = 'none';
+            
+            if (dmnModeler) {
+                dmnModeler.destroy();
+                dmnModeler = null;
+            }
+            
+            if (contextMenuObserver) {
+                contextMenuObserver.disconnect();
+            }
+        }
+
+        function saveDMNChanges() {
+            if (!dmnModeler) {
+                updateDebugInfo('❌ No DMN editor active to save from');
+                return;
+            }
+
+            updateDebugInfo('💾 Saving changes...');
+            
+            dmnModeler.saveXML().then(result => {
+                // Update the main table with the new DMN data
+                updateMainTableFromDMN(result.xml);
+                updateDebugInfo('✅ Changes saved and applied to main table');
+                
+                // Simple toast notification
+                showSuccessToast('Changes saved successfully');
+                
+                // Switch back to view mode
+                showViewMode();
+            }).catch(err => {
+                updateDebugInfo('❌ Error saving: ' + err.message);
+                showErrorToast('Failed to save changes: ' + err.message);
+            });
+        }
+
+        // Update main table from DMN XML
+        function updateMainTableFromDMN(dmnXML) {
+            try {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(dmnXML, 'text/xml');
+                
+                const decisionTable = xmlDoc.querySelector('decisionTable');
+                if (!decisionTable) {
+                    throw new Error('No decision table found in DMN');
+                }
+
+                const inputs = decisionTable.querySelectorAll('input');
+                const outputs = decisionTable.querySelectorAll('output');
+                const rules = decisionTable.querySelectorAll('rule');
+
+                // Update main table headers
+                updateTableHeaders(inputs, outputs);
+                
+                // Update main table body
+                updateTableBody(rules, inputs.length, outputs.length);
+                
+                console.log('✅ Main table updated with', rules.length, 'rules');
+                
+            } catch (error) {
+                console.error('Error updating main table:', error);
+                updateDebugInfo('❌ Error updating main table: ' + error.message);
+            }
+        }
+
+        // Update table headers
+        function updateTableHeaders(inputs, outputs) {
+            const table = document.getElementById('main-decision-table');
+            const headerRow = table.querySelector('thead tr:last-child');
+            
+            // Clear existing headers (except first column)
+            while (headerRow.children.length > 1) {
+                headerRow.removeChild(headerRow.lastChild);
+            }
+
+            // Add input headers (conditions)
+            inputs.forEach(input => {
+                const th = document.createElement('th');
+                th.textContent = input.getAttribute('label') || input.getAttribute('id') || 'Input';
+                th.style.cssText = 'padding: 12px; text-align: left; font-weight: 500; border-right: 1px solid rgba(255,255,255,0.2);';
+                headerRow.appendChild(th);
+            });
+
+            // Add output headers (actions)
+            outputs.forEach(output => {
+                const th = document.createElement('th');
+                th.textContent = output.getAttribute('label') || output.getAttribute('name') || 'Output';
+                th.style.cssText = 'padding: 12px; text-align: left; font-weight: 500; border-right: 1px solid rgba(255,255,255,0.2);';
+                headerRow.appendChild(th);
+            });
+            
+            // Remove border from last header
+            if (headerRow.lastElementChild) {
+                headerRow.lastElementChild.style.borderRight = 'none';
+            }
+            
+            console.log('✅ Table headers updated with', inputs.length, 'inputs and', outputs.length, 'outputs');
+        }
+
+        // Update table body
+        function updateTableBody(rules, inputCount, outputCount) {
+            const table = document.getElementById('main-decision-table');
+            const tbody = table.querySelector('tbody');
+            
+            // Clear existing rows
+            tbody.innerHTML = '';
+
+            // Add new rows
+            rules.forEach((rule, ruleIndex) => {
+                const tr = document.createElement('tr');
+                
+                // Rule number
+                const ruleNumTd = document.createElement('td');
+                ruleNumTd.className = 'rule-number';
+                ruleNumTd.textContent = ruleIndex + 1;
+                tr.appendChild(ruleNumTd);
+
+                // Input entries
+                const inputEntries = rule.querySelectorAll('inputEntry');
+                inputEntries.forEach(entry => {
+                    const td = document.createElement('td');
+                    td.className = 'condition-cell equal';
+                    const text = entry.querySelector('text');
+                    td.textContent = text ? text.textContent : '-';
+                    tr.appendChild(td);
+                });
+
+                // Output entries
+                const outputEntries = rule.querySelectorAll('outputEntry');
+                outputEntries.forEach(entry => {
+                    const td = document.createElement('td');
+                    td.className = 'action-cell';
+                    const text = entry.querySelector('text');
+                    td.textContent = text ? text.textContent : '';
+                    tr.appendChild(td);
+                });
+
+                tbody.appendChild(tr);
+            });
+        }
+
+
+    </script>
+
+         <!-- Custom Tippy.js Theme -->
+     <style>
+         .tippy-box[data-theme~='pubnub'] {
+             background-color: #1f2937;
+             color: white;
+             border-radius: 6px;
+             font-size: 12px;
+         }
+         .tippy-box[data-theme~='pubnub'][data-placement^='top'] > .tippy-arrow::before {
+             border-top-color: #1f2937;
+         }
+     </style>
+</body>
+</html> 
